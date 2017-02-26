@@ -1,0 +1,142 @@
+
+<!-- http://phant.io/graphing/google/2014/07/07/graphing-data/ -->
+<html>
+  <head>
+  <title>Traffic Data</title>
+    <META HTTP-EQUIV="refresh" CONTENT="60">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+
+    <script language="JavaScript">
+
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        // Get current date and hour
+        var currentDate = new Date();
+        var currentYear = currentDate.getFullYear()
+        var currentMonth = ('0' + (currentDate.getMonth()+1)).slice(-2);
+        var currentDay = ('0' + currentDate.getDate()).slice(-2);
+        var currentDateString = (currentYear + '-' + currentMonth + '-' + currentDay);
+        var currentHour = currentDate.getHours();
+
+        // Parse to work JSON
+        var jsonData = $.ajax({
+          url: './data/' + currentDateString + '_to_work.json',
+          dataType: "json",
+          async: false
+          }).responseText;
+
+        var actual_JSON = JSON.parse(jsonData);
+
+        // Create to work DataTable
+        var to_work_data = new google.visualization.DataTable();
+        to_work_data.addColumn('date', 'Time of day');
+        to_work_data.addColumn('number', 'Duration (min)');
+        to_work_data.addColumn({type: 'string', role: 'tooltip'});
+
+        for(var key in actual_JSON){
+          // console.log('======================================');
+          // console.log('date: ' + actual_JSON[key].date);
+          // console.log('time: ' + actual_JSON[key].time);
+          // console.log('origin: ' + actual_JSON[key].origin);
+          // console.log('destination: ' + actual_JSON[key].destination);
+          // console.log('route: ' + actual_JSON[key].route);
+          // console.log('durationInTraffic: ' + actual_JSON[key].durationInTraffic);
+
+          var timeParts = actual_JSON[key].time.split(":");
+          var hour = Number(timeParts[0]);
+          var minutes = Number(timeParts[1]);
+          var seconds = Number(timeParts[2]);
+          var durationInTraffic = parseInt(actual_JSON[key].durationInTraffic);
+          var route = actual_JSON[key].route;
+          var date = new Date(currentYear, currentMonth-1, currentDay, hour, minutes, seconds);
+          //data.addRow([[hour, minutes, seconds], durationInTraffic]);
+          var tooltipString = date.toLocaleTimeString() + "\n" + durationInTraffic + " min";
+          to_work_data.addRow([date, durationInTraffic, tooltipString]);
+        }
+
+        // Parse to work JSON
+        jsonData = $.ajax({
+          url: './data/' + currentDateString + '_to_home.json',
+          dataType: "json",
+          async: false
+          }).responseText;
+
+        actual_JSON = JSON.parse(jsonData);
+
+        // Create to home DataTable
+        var to_home_data = new google.visualization.DataTable();
+        to_home_data.addColumn('date', 'Time of day');
+        to_home_data.addColumn('number', 'Duration (min)');
+        to_home_data.addColumn({type: 'string', role: 'tooltip'});
+
+        for(var key in actual_JSON){
+          var timeParts = actual_JSON[key].time.split(":");
+          var hour = Number(timeParts[0]);
+          var minutes = Number(timeParts[1]);
+          var seconds = Number(timeParts[2]);
+          var durationInTraffic = parseInt(actual_JSON[key].durationInTraffic);
+          var route = actual_JSON[key].route;
+          var date = new Date(currentYear, currentMonth-1, currentDay, hour, minutes, seconds);
+          //data.addRow([[hour, minutes, seconds], durationInTraffic]);
+          var tooltipString = date.toLocaleTimeString() + "\n" + durationInTraffic + " min";
+          to_home_data.addRow([date, durationInTraffic, tooltipString]);
+        }
+
+        // Chart options
+        var options = {
+          //title: 'Travel time from Home to Work',
+          'width': 1050,
+          'height': 500,
+          //tooltip: {isHtml: true},
+          hAxis: {
+            title: 'Time of day',
+            //format: 'kk:mm',
+            showTextEvery: 2,
+            gridlines: {
+              count: -1
+            }
+          },
+          vAxis: {
+            title: 'Duration in traffic',
+            gridlines: {
+              count: -1
+            }
+          },
+          legend: { position: 'none' },
+          crosshair: { trigger: 'both' },
+          theme: 'material'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('top'));
+        chart.draw(to_work_data, options);
+
+        // Instantiate and draw the charts
+        if(currentHour < 12){
+          var to_work_chart = new google.visualization.LineChart(document.getElementById('top'));
+          var to_home_chart = new google.visualization.LineChart(document.getElementById('bottom'));
+        }
+        else{
+          var to_work_chart = new google.visualization.LineChart(document.getElementById('bottom'));
+          var to_home_chart = new google.visualization.LineChart(document.getElementById('top'));
+        }
+
+        options.title = 'Travel time from Home to Work';
+        to_work_chart.draw(to_work_data, options);
+        options.title = 'Travel time from Work to Home';
+        to_home_chart.draw(to_home_data, options);
+      }
+
+    </script>
+
+  <body>
+    <center>
+    <div id="top" style="width: 1050; height: 500px"></div>
+    <div id="bottom" style="width: 1050; height: 500px"></div>
+    </center>
+  </body>
+</html>
