@@ -109,7 +109,11 @@
           },
           legend: { position: 'none' },
           crosshair: { trigger: 'both' },
-          theme: 'material'
+          theme: 'material',
+          explorer: {
+            actions: ['dragToZoom', 'rightClickToReset'],
+            keepInBounds: true
+          }
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('top'));
