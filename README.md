@@ -9,7 +9,7 @@ Install/Config
 
 1. Clone the repository to the folder of your choice on your webserver
 2. Build the jar - mvn package
-3. Move/copy the jar up to the root directory of the project
+3. Move/copy the jar from the target directory up to the root directory of the project
 4. Update run.sh with appropriate values for <home address> and <work address> in the following format: "123 Fake Street Sometown CA 01234" (no commas or other punctuation, everything separated by spaces)
 5. Update run.sh with your Google Maps API key
 6. Make run.sh executable (if necessary) - chmod +x run.sh
